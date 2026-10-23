@@ -1,4 +1,5 @@
 import os
+from uuid import UUID, uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,9 @@ from groq import APIError, Groq
 from task4 import detect_intent, generate_response
 
 app = FastAPI()
+sessions: dict[UUID, list[dict[str, str]]] = {}
+MAX_STORED_MESSAGES = 40
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -17,23 +21,34 @@ app.add_middleware(
 )
 
 
-class ChatMessage(BaseModel):
-    role: str = Field(pattern=r"^(user|assistant)$")
-    content: str = Field(min_length=1, max_length=8000)
-
-
 class ChatRequest(BaseModel):
+    session_id: UUID
     message: str = Field(min_length=1, max_length=8000)
-    history: list[ChatMessage] = Field(default_factory=list, max_length=8)
 
 
 class ChatResponse(BaseModel):
+    session_id: UUID
     intent: str
     reply: str
 
 
+class SessionResponse(BaseModel):
+    session_id: UUID
+
+
+@app.post("/sessions", response_model=SessionResponse)
+def create_session() -> SessionResponse:
+    session_id = uuid4()
+    sessions[session_id] = []
+    return SessionResponse(session_id=session_id)
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
+    history = sessions.get(request.session_id)
+    if history is None:
+        raise HTTPException(status_code=404, detail="Chat session not found. Start a new chat.")
+
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         raise HTTPException(
@@ -42,16 +57,26 @@ def chat(request: ChatRequest) -> ChatResponse:
         )
 
     intent = detect_intent(request.message)
-    history = [item.model_dump() for item in request.history]
 
     try:
         reply = generate_response(
             Groq(api_key=api_key),
             request.message,
             intent,
-            history,
+            history.copy(),
         )
     except APIError as error:
-        raise HTTPException(status_code=502, detail="The Groq API request failed.") from error
+        raise HTTPException(
+            status_code=502,
+            detail="The Groq API request failed.",
+        ) from error
 
-    return ChatResponse(intent=intent, reply=reply)
+    history.extend(
+        [
+            {"role": "user", "content": request.message},
+            {"role": "assistant", "content": reply},
+        ]
+    )
+    del history[:-MAX_STORED_MESSAGES]
+
+    return ChatResponse(session_id=request.session_id, intent=intent, reply=reply)

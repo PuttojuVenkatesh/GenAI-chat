@@ -1,30 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-const API_URL = "http://127.0.0.1:8000/chat";
+const API_URL = "http://127.0.0.1:8000";
 
 export default function App() {
+  const [sessionId, setSessionId] = useState("");
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    createSession()
+      .then(setSessionId)
+      .catch((requestError) => setError(requestError.message));
+  }, []);
+
+  async function createSession() {
+    const response = await fetch(`${API_URL}/sessions`, { method: "POST" });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail || "Could not start a chat session.");
+    }
+    return data.session_id;
+  }
+
+  async function startNewChat() {
+    setPending(true);
+    setError("");
+    try {
+      const newSessionId = await createSession();
+      setSessionId(newSessionId);
+      setMessages([]);
+      setInput("");
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function sendMessage(event) {
     event.preventDefault();
     const message = input.trim();
-    if (!message || pending) return;
+    if (!message || pending || !sessionId) return;
 
-    const history = messages.map(({ role, content }) => ({ role, content }));
     setMessages((current) => [...current, { role: "user", content: message }]);
     setInput("");
     setError("");
     setPending(true);
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, history: history.slice(-8) }),
+        body: JSON.stringify({ session_id: sessionId, message }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -35,6 +65,8 @@ export default function App() {
         { role: "assistant", content: data.reply, intent: data.intent },
       ]);
     } catch (requestError) {
+      setMessages((current) => current.slice(0, -1));
+      setInput(message);
       setError(requestError.message);
     } finally {
       setPending(false);
@@ -44,8 +76,17 @@ export default function App() {
   return (
     <main className="chat">
       <header>
-        <h1>Gen AI Chat</h1>
-        <p>Ask a question or continue the conversation.</p>
+        <div>
+          <h1>Gen AI Chat</h1>
+          <p>Ask a question or continue the conversation.</p>
+        </div>
+        <button
+          type="button"
+          onClick={startNewChat}
+          disabled={pending || !sessionId}
+        >
+          New Chat
+        </button>
       </header>
 
       <section className="conversation" aria-live="polite">
@@ -79,7 +120,7 @@ export default function App() {
           rows="3"
           disabled={pending}
         />
-        <button type="submit" disabled={pending || !input.trim()}>
+        <button type="submit" disabled={pending || !sessionId || !input.trim()}>
           Send
         </button>
       </form>

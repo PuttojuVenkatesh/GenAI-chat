@@ -1,15 +1,17 @@
 # Gen AI Chat
 
 A small Python and React chat application using the Groq chat-completions API.
-The Python service detects a basic intent, includes recent conversation history,
-and returns Markdown-formatted assistant responses. The React interface renders
-assistant Markdown with `react-markdown`.
+The Python service assigns each chat a UUID, stores successful turns in
+process-memory, detects a basic intent, and sends recent session history to
+Groq. The React interface renders assistant Markdown with `react-markdown` and
+starts a separate session for each new chat.
 
 ## Requirements
 
 - Python 3.10 or newer
 - Node.js and npm
 - A Groq API key
+- Git (optional, for syncing with GitHub)
 
 ## Setup
 
@@ -52,6 +54,19 @@ npm run dev
 ```
 
 Open the local URL printed by Vite (usually `http://localhost:5173`).
+Use **New Chat** to start a separate conversation. Each new session has its own
+message history.
+
+The in-memory session store is cleared whenever the Python API process stops or
+restarts. It is intended for development and does not persist chats to disk.
+
+## Run backend tests
+
+From the project folder:
+
+```powershell
+.\venv\Scripts\python.exe -m unittest discover -s tests -v
+```
 
 ## Run the terminal examples
 

@@ -27,6 +27,13 @@ header h1 {
   margin: 0;
 }
 
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 header p,
 .empty,
 .status {
@@ -86,6 +93,11 @@ form {
   gap: 12px;
 }
 
+form button,
+header button {
+  flex-shrink: 0;
+}
+
 textarea {
   flex: 1;
   resize: vertical;
@@ -125,4 +137,20 @@ button:disabled {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+@media (max-width: 480px) {
+  .chat {
+    margin: 16px auto;
+    padding: 16px;
+  }
+
+  form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  form button {
+    align-self: flex-end;
+  }
 }
