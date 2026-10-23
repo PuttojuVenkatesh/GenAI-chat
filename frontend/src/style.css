@@ -1,0 +1,128 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1f2937;
+  background: #f3f4f6;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+.chat {
+  width: min(760px, calc(100% - 32px));
+  margin: 32px auto;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px #11182712;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p,
+.empty,
+.status {
+  color: #6b7280;
+}
+
+.conversation {
+  display: grid;
+  gap: 16px;
+  min-height: 260px;
+  max-height: 60vh;
+  overflow-y: auto;
+  margin: 24px 0;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.message.user {
+  background: #eff6ff;
+}
+
+.message.assistant {
+  background: #f9fafb;
+}
+
+.message small {
+  display: block;
+  margin-top: 4px;
+  color: #6b7280;
+}
+
+.markdown > :first-child {
+  margin-top: 8px;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown pre {
+  overflow-x: auto;
+  padding: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+}
+
+form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+textarea {
+  flex: 1;
+  resize: vertical;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #9ca3af;
+  border-radius: 8px;
+  font: inherit;
+}
+
+button {
+  padding: 12px 20px;
+  color: white;
+  background: #2563eb;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
