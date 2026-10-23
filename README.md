@@ -38,22 +38,29 @@ npm install
 
 ## Run the web chat
 
-Open two terminals in the project folder.
+The Python backend and React frontend must both be running. If only the
+frontend is running, the app cannot create a chat session and the Send button
+stays disabled. The Vite development server forwards `/api` requests to the
+backend, so it works whether Vite chooses port 5173 or another available port.
 
-Terminal 1 — start the Python API:
+Open two terminals in VS Code.
+
+Terminal 1 — from the project folder, start the Python API:
 
 ```powershell
 .\venv\Scripts\python.exe -m uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-Terminal 2 — start the React development server:
+Leave Terminal 1 running. In Terminal 2, start the React development server:
 
 ```powershell
 Set-Location .\frontend
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`).
+Open the local URL printed by Vite (usually `http://localhost:5173`). Wait for
+the header to show **Ready** before sending a message. If it shows **Offline**,
+confirm Terminal 1 is running and select **Retry**.
 Use **New Chat** to start a separate conversation. Each new session has its own
 message history.
 
