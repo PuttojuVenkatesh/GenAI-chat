@@ -85,11 +85,14 @@ export default function App() {
     <main className="chat">
       <header>
         <a className="brand" href="/" aria-label="Gen AI Chat home">
-          <span className="brand-mark" aria-hidden="true">G</span>
-          <span>Gen AI <span className="brand-light">Chat</span></span>
+          <span className="brand-mark" aria-hidden="true">✳</span>
+          <span>Gen AI</span>
         </a>
         <div className="header-actions">
-          <span className={`connection ${sessionId ? "connected" : ""}`}>
+          <span
+            className={`connection ${sessionId ? "connected" : ""}`}
+            role="status"
+          >
             <span className="connection-dot" />
             {sessionId ? "Ready" : pending ? "Connecting" : "Offline"}
           </span>
@@ -108,26 +111,26 @@ export default function App() {
         {messages.length === 0 && (
           <div className="welcome">
             <span className="welcome-mark" aria-hidden="true">✳</span>
-            <h1>What can I help with?</h1>
-            <p>Ask a question or start a conversation. Your chat stays separate when you choose New chat.</p>
+            <h1>How can I help?</h1>
+            <p>Ask a question to get started.</p>
             {!sessionId && pending && <p className="status">Connecting to your chat...</p>}
           </div>
         )}
         {messages.map((item, index) => (
           <article className={`message ${item.role}`} key={`${index}-${item.role}`}>
-            <span className="message-avatar" aria-hidden="true">
-              {item.role === "user" ? "Y" : "✳"}
-            </span>
-            <div className="message-body">
-              <strong>{item.role === "user" ? "You" : "Assistant"}</strong>
-              {item.intent && <small>Intent: {item.intent}</small>}
-            {item.role === "assistant" ? (
-              <div className="markdown">
-                <ReactMarkdown>{item.content}</ReactMarkdown>
-              </div>
-            ) : (
-              <p>{item.content}</p>
+            {item.role === "assistant" && (
+              <span className="message-avatar" aria-label="Assistant">
+                ✳
+              </span>
             )}
+            <div className="message-body">
+              {item.role === "assistant" ? (
+                <div className="markdown">
+                  <ReactMarkdown>{item.content}</ReactMarkdown>
+                </div>
+              ) : (
+                <p>{item.content}</p>
+              )}
             </div>
           </article>
         ))}
@@ -150,7 +153,13 @@ export default function App() {
           id="message"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder={sessionId ? "Message Gen AI Chat..." : "Start the Python backend to chat"}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              event.currentTarget.form?.requestSubmit();
+            }
+          }}
+          placeholder={sessionId ? "Message Gen AI..." : "Start the Python backend to chat"}
           rows="2"
           disabled={pending}
         />

@@ -27,10 +27,14 @@ def generate_response(
         {
             "role": "system",
             "content": (
-                "You are a helpful assistant. Answer the user's latest message "
-                "using the conversation history when relevant. The detected "
-                f"intent is '{intent}'; tailor your response to it. Format "
-                "responses as Markdown, using headings or lists when they help."
+                "You are a helpful, conversational AI assistant. Answer the "
+                "latest user message directly and naturally, using earlier "
+                "messages when relevant. The detected intent is "
+                f"'{intent}'; use it to understand the request, but do not "
+                "mention the intent label. Keep simple answers concise. Use "
+                "Markdown headings, lists, or fenced code blocks when they "
+                "make a longer answer easier to read; avoid unnecessary "
+                "formatting for short answers."
             ),
         },
         *history[-8:],
