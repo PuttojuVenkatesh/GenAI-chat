@@ -1,15 +1,16 @@
 # Gen AI Chat
 
 A small Python and React chat application using the Groq chat-completions API.
-The Python service assigns each chat a UUID, stores successful turns in
-process-memory, detects a basic intent, and sends recent session history to
-Groq. The React interface renders assistant Markdown with `react-markdown` and
-starts a separate session for each new chat.
+The Python service assigns each chat a UUID, stores conversations in MongoDB,
+detects a basic intent, and sends recent session history to Groq. The React
+interface renders assistant Markdown with `react-markdown` and provides a
+sidebar to reopen saved conversations.
 
 ## Requirements
 
 - Python 3.10 or newer
 - Node.js and npm
+- MongoDB running locally, or a MongoDB Atlas connection string
 - A Groq API key
 - Git (optional, for syncing with GitHub)
 
@@ -23,10 +24,14 @@ py -m venv venv
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and replace the placeholder with your Groq API key:
+Copy `.env.example` to `.env` and set your Groq API key. The default MongoDB
+connection uses a local server at `mongodb://127.0.0.1:27017`; change
+`MONGODB_URI` to your Atlas connection string if you use MongoDB Atlas:
 
 ```text
 GROQ_API_KEY=your_actual_key
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DATABASE=genai_chat
 ```
 
 Install the frontend dependencies:
@@ -61,11 +66,13 @@ npm run dev
 Open the local URL printed by Vite (usually `http://localhost:5173`). Wait for
 the header to show **Ready** before sending a message. If it shows **Offline**,
 confirm Terminal 1 is running and select **Retry**.
-Use **New Chat** to start a separate conversation. Each new session has its own
-message history.
+Use **New chat** to start a separate conversation. Saved conversations appear
+in the left sidebar and can be reopened after a browser refresh or backend
+restart. The backend stores the chat title and messages in the `chats`
+collection of the configured MongoDB database.
 
-The in-memory session store is cleared whenever the Python API process stops or
-restarts. It is intended for development and does not persist chats to disk.
+If MongoDB is not running or the URI is incorrect, the API reports that MongoDB
+is unavailable. Local MongoDB must be started separately from the Python API.
 
 ## Run backend tests
 
